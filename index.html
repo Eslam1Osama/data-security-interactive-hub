@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ECE4304: Data Security - Main Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- UPDATE: Immediate theme application script to prevent flash of incorrect theme (FOIT) -->
+    <script>
+      // This IIFE (Immediately Invoked Function Expression) runs before the page content is rendered.
+      // It checks for a saved theme in localStorage or detects the user's system preference
+      // and applies the 'data-theme' attribute to the <html> element instantly.
+      (function() {
+        try {
+          var mode = localStorage.getItem('theme');
+          if (!mode) {
+            // If no theme is saved, check the OS/browser preference
+            mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', mode);
+        } catch (e) {
+          // Fails silently in case of any error (e.g., security restrictions on localStorage)
+          console.error('Error applying initial theme:', e);
+        }
+      })();
+    </script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         /* Themed Color Palette & Core Styles */
@@ -78,11 +99,12 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            transition: opacity 0.5s ease-out;
+            opacity: 1; /* Start fully visible */
+            transition: opacity 0.5s ease-out, visibility 0s 0.5s;
         }
         #preloader.loaded {
             opacity: 0;
-            pointer-events: none;
+            visibility: hidden;
         }
         .spinner {
             width: 60px;
@@ -106,7 +128,7 @@
         .page-content {
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.5s ease-in, visibility 0.5s;
+            transition: opacity 0.5s ease-in, visibility 0s 0.5s;
             position: relative;
             z-index: 1;
         }
@@ -356,33 +378,24 @@
             will-change: transform;
         }
         
-        .module-card-iframe-wrapper {
+        .module-card-image-wrapper {
             width: 100%;
             aspect-ratio: 16 / 10;
             overflow: hidden;
             position: relative;
             background-color: var(--blue1);
+            border-bottom: 1px solid var(--accent);
         }
         
-        .module-card-iframe {
+        .module-card-image {
             width: 100%;
             height: 100%;
-            border: none;
-            transform: scale(0.8);
-            transform-origin: 0 0;
-            width: 125%;
-            height: 125%;
-            pointer-events: none;
+            object-fit: cover;
+            transition: transform 0.4s ease;
         }
 
-        .iframe-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            cursor: pointer;
+        .module-card:hover .module-card-image {
+            transform: scale(1.05);
         }
 
         /* --- Card Preloader --- */
@@ -400,7 +413,7 @@
             justify-content: center;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
         }
         .module-card.is-loading .card-preloader {
             opacity: 1;
@@ -409,26 +422,13 @@
         .card-spinner {
             width: 50px;
             height: 50px;
-            animation: card-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
             border-color: #ffffff transparent transparent transparent;
             border-style: solid;
             border-width: 4px;
             border-radius: 50%;
             display: block;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
         }
-        .card-ready-indicator {
-            display: none;
-            color: #fff;
-            font-size: 3em;
-            animation: pop-in 0.3s ease-out;
-        }
-        .module-card.is-ready .card-spinner {
-            display: none;
-        }
-        .module-card.is-ready .card-ready-indicator {
-            display: block;
-        }
-
 
         .module-content {
             padding: 25px;
@@ -473,9 +473,10 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 998; /* Below sticky header, above content */
+            z-index: 998;
             background: transparent;
             display: none;
+            cursor: wait;
         }
         body.loading-active #page-blocker {
             display: block;
@@ -538,7 +539,7 @@
             .notification { max-width: calc(100% - 40px); left: -100%; }
             .notification.show { left: 20px; }
              .sticky-header-title {
-                font-size: 0.9rem;
+                 font-size: 0.9rem;
             }
         }
 
@@ -560,7 +561,7 @@
         <div class="sticky-header-content">
             <div class="sticky-header-title">ECE4304: Data Security</div>
             <div class="sticky-header-toggle" id="stickyThemeToggleContainer">
-                </div>
+            </div>
         </div>
         <div class="progress-container">
             <div class="progress-bar" id="progressBar"></div>
@@ -608,14 +609,13 @@
 
                 <section class="modules-grid">
                     
+                    <!-- Card 1: Basic Concepts -->
                     <a href="https://basic-concepts-in-data-security.vercel.app/" target="_blank" class="module-card fade-in-up">
                         <div class="card-preloader">
                             <div class="card-spinner"></div>
-                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
                         </div>
-                        <div class="module-card-iframe-wrapper">
-                             <iframe src="https://basic-concepts-in-data-security.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Basic Concepts module"></iframe>
-                             <div class="iframe-overlay"></div>
+                        <div class="module-card-image-wrapper">
+                             <img src="media/Basic_Concepts.png" class="module-card-image" alt="Preview of Basic Concepts module" loading="lazy">
                         </div>
                         <div class="module-content">
                             <h3 class="module-title">Basic Concepts</h3>
@@ -624,14 +624,13 @@
                         </div>
                     </a>
 
+                    <!-- Card 2: Block Cipher Modes -->
                     <a href="https://block-cipher-learning-module.vercel.app/" target="_blank" class="module-card fade-in-up">
                         <div class="card-preloader">
                             <div class="card-spinner"></div>
-                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
                         </div>
-                        <div class="module-card-iframe-wrapper">
-                             <iframe src="https://block-cipher-learning-module.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Block Cipher Modes module"></iframe>
-                             <div class="iframe-overlay"></div>
+                        <div class="module-card-image-wrapper">
+                             <img src="media/Block_Cipher_Modes.png" class="module-card-image" alt="Preview of Block Cipher Modes module" loading="lazy">
                         </div>
                         <div class="module-content">
                             <h3 class="module-title">Block Cipher Modes</h3>
@@ -639,15 +638,14 @@
                             <span class="launch-module">Launch Module <i class="fas fa-arrow-right arrow-icon"></i></span>
                         </div>
                     </a>
-
+                    
+                    <!-- Card 3: Digital Signatures -->
                     <a href="https://data-security-digital-signatures.vercel.app/" target="_blank" class="module-card fade-in-up">
                         <div class="card-preloader">
                             <div class="card-spinner"></div>
-                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
                         </div>
-                        <div class="module-card-iframe-wrapper">
-                             <iframe src="https://data-security-digital-signatures.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Digital Signatures module"></iframe>
-                             <div class="iframe-overlay"></div>
+                        <div class="module-card-image-wrapper">
+                             <img src="media/Digital_Signatures.png" class="module-card-image" alt="Preview of Digital Signatures module" loading="lazy">
                         </div>
                         <div class="module-content">
                             <h3 class="module-title">Digital Signatures</h3>
@@ -656,14 +654,13 @@
                         </div>
                     </a>
 
+                    <!-- Card 4: Firewalls & IDS -->
                     <a href="https://firewalls-ids-web.vercel.app/" target="_blank" class="module-card fade-in-up">
                          <div class="card-preloader">
                             <div class="card-spinner"></div>
-                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
                         </div>
-                         <div class="module-card-iframe-wrapper">
-                             <iframe src="https://firewalls-ids-web.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Firewalls & IDS module"></iframe>
-                             <div class="iframe-overlay"></div>
+                         <div class="module-card-image-wrapper">
+                             <img src="media/Firewalls_IDS.png" class="module-card-image" alt="Preview of Firewalls & IDS module" loading="lazy">
                         </div>
                         <div class="module-content">
                             <h3 class="module-title">Firewalls & IDS</h3>
@@ -700,15 +697,18 @@
 
     <script>
         // --- PRELOADER LOGIC ---
-        window.addEventListener('load', function() {
+        const contentLoaded = new Promise(resolve => window.addEventListener('load', resolve));
+        const minPreloadTime = new Promise(resolve => setTimeout(resolve, 1200)); 
+        
+        Promise.all([contentLoaded, minPreloadTime]).then(() => {
             const preloader = document.getElementById('preloader');
             const pageContent = document.getElementById('pageContent');
             
             preloader.classList.add('loaded');
+            pageContent.classList.add('visible');
             
             setTimeout(() => {
-                preloader.style.display = 'none';
-                pageContent.classList.add('visible');
+                preloader.style.display = 'none'; 
                 initializeScrollAnimations();
             }, 500);
         });
@@ -723,6 +723,8 @@
             const progressBar = document.getElementById('progressBar');
 
             // --- THEME MANAGEMENT ---
+            // UPDATE: The initial theme is now set by a script in the <head> to prevent a "flash".
+            // This section now only handles theme *changes* initiated by the user.
             function setTheme(mode) {
                 root.setAttribute('data-theme', mode);
                 document.querySelectorAll('.toggle-switch').forEach(ts => ts.setAttribute('data-theme', mode));
@@ -731,7 +733,8 @@
 
             const themeClickHandler = () => {
                 const currentTheme = root.getAttribute('data-theme');
-                setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
             };
 
             const stickyThemeToggle = mainThemeToggle.cloneNode(true);
@@ -740,13 +743,10 @@
             mainThemeToggle.addEventListener('click', themeClickHandler);
             stickyThemeToggle.addEventListener('click', themeClickHandler);
 
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-            setTheme(initialTheme);
-            if (!savedTheme) {
-                setTheme(prefersDark ? 'dark' : 'light');
-            }
+            // Sync the toggle switch UI with the theme that was set by the <head> script.
+            const currentTheme = root.getAttribute('data-theme') || 'light';
+            document.querySelectorAll('.toggle-switch').forEach(ts => ts.setAttribute('data-theme', currentTheme));
+
 
             // --- STICKY HEADER LOGIC ---
             const observer = new IntersectionObserver(
@@ -814,7 +814,7 @@
                 });
             });
 
-            // --- SMART CARD PRELOADER ---
+            // --- CARD CLICK-TO-LOAD LOGIC ---
             document.querySelectorAll('.module-card').forEach(card => {
                 card.addEventListener('click', function(event) {
                     if (document.body.classList.contains('loading-active')) {
@@ -828,27 +828,16 @@
 
                     document.body.classList.add('loading-active');
                     this.classList.add('is-loading');
-                    this.style.transform = '';
+                    this.style.transform = ''; 
                     
-                    const preloaderIframe = document.createElement('iframe');
-                    preloaderIframe.style.display = 'none';
-                    preloaderIframe.src = destinationUrl;
-                    preloaderIframe.setAttribute('data-preloader', 'true');
-
-                    const minimumLoadTime = new Promise(resolve => setTimeout(resolve, 800));
-                    const iframeLoad = new Promise(resolve => {
-                        preloaderIframe.onload = resolve;
-                    });
-                    
-                    Promise.all([minimumLoadTime, iframeLoad]).then(() => {
-                        this.classList.add('is-ready'); 
-                        
+                    setTimeout(() => {
+                        window.location.href = destinationUrl;
                         setTimeout(() => {
-                            window.location.href = destinationUrl;
-                        }, 500);
-                    });
-                    
-                    document.body.appendChild(preloaderIframe);
+                             document.body.classList.remove('loading-active');
+                             this.classList.remove('is-loading');
+                        }, 1000);
+
+                    }, 1200);
                 });
             });
 
@@ -857,9 +846,8 @@
                 if (event.persisted) {
                     document.body.classList.remove('loading-active');
                     document.querySelectorAll('.module-card').forEach(card => {
-                        card.classList.remove('is-loading', 'is-ready');
+                        card.classList.remove('is-loading');
                     });
-                    document.querySelectorAll('iframe[data-preloader="true"]').forEach(iframe => iframe.remove());
                 }
             });
             
