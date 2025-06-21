@@ -348,7 +348,7 @@
             position: relative;
             overflow: hidden;
             border: 1px solid transparent;
-            will-change: transform; /* Performance hint for the browser */
+            will-change: transform;
         }
         
         .module-card-iframe-wrapper {
@@ -378,6 +378,42 @@
             height: 100%;
             z-index: 1;
             cursor: pointer;
+        }
+
+        /* --- Card Preloader --- */
+        .card-preloader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .module-card.is-loading .card-preloader {
+            opacity: 1;
+            visibility: visible;
+        }
+        .card-spinner {
+            width: 50px;
+            height: 50px;
+            animation: card-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            border-color: #ffffff transparent transparent transparent;
+            border-style: solid;
+            border-width: 4px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        @keyframes card-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
         .module-content {
@@ -416,6 +452,21 @@
         .module-card:hover .launch-module { color: var(--secondary); }
         .module-card:hover .arrow-icon { transform: translateX(5px); }
         
+        /* --- Page Blocker Overlay --- */
+        #page-blocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 998; /* Below sticky header, above content */
+            background: transparent;
+            display: none;
+        }
+        body.loading-active #page-blocker {
+            display: block;
+        }
+
         /* --- Footer --- */
         footer {
             text-align: center;
@@ -487,6 +538,9 @@
         <div class="spinner"></div>
         <p class="loading-text">Preparing learning modules...</p>
     </div>
+    
+    <div id="page-blocker"></div>
+
 
     <!-- Sticky Header -->
     <header id="sticky-header">
@@ -539,7 +593,7 @@
                 <!-- Hero Section -->
                 <section class="hero-section fade-in-up">
                     <h2>Course Learning Modules</h2>
-                    <p>This is more than a course; it's your entry into the world of Data Security. We move from theory to real-world practice, equipping you with the skills to defend digital assets. You will master the core of secure communication, from the elegant mathematics of symmetric and asymmetric cryptography to the robust logic of modern authentication protocols. Emerge ready to analyze complex threats, design resilient security policies, and implement the technologies that protect our most vital data.</p>
+                    <p>An interactive journey into the core principles of data security. Select a module below to begin your exploration of key concepts, from foundational theory to practical defense mechanisms.</p>
                 </section>
 
                 <!-- Modules Section -->
@@ -547,6 +601,7 @@
                     
                     <!-- Module 1: Basic Concepts -->
                     <a href="https://basic-concepts-in-data-security.vercel.app/" target="_blank" class="module-card fade-in-up">
+                        <div class="card-preloader"><div class="card-spinner"></div></div>
                         <div class="module-card-iframe-wrapper">
                              <iframe src="https://basic-concepts-in-data-security.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Basic Concepts module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -560,6 +615,7 @@
 
                     <!-- Module 2: Block Cipher Operation Modes -->
                     <a href="https://block-cipher-learning-module.vercel.app/" target="_blank" class="module-card fade-in-up">
+                        <div class="card-preloader"><div class="card-spinner"></div></div>
                         <div class="module-card-iframe-wrapper">
                              <iframe src="https://block-cipher-learning-module.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Block Cipher Modes module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -573,6 +629,7 @@
 
                     <!-- Module 3: Digital Signatures -->
                     <a href="https://data-security-digital-signatures.vercel.app/" target="_blank" class="module-card fade-in-up">
+                        <div class="card-preloader"><div class="card-spinner"></div></div>
                         <div class="module-card-iframe-wrapper">
                              <iframe src="https://data-security-digital-signatures.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Digital Signatures module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -586,6 +643,7 @@
 
                     <!-- Module 4: Firewalls & IDS -->
                     <a href="https://firewalls-ids-web.vercel.app/" target="_blank" class="module-card fade-in-up">
+                         <div class="card-preloader"><div class="card-spinner"></div></div>
                          <div class="module-card-iframe-wrapper">
                              <iframe src="https://firewalls-ids-web.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Firewalls & IDS module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -724,18 +782,52 @@
             // --- 3D CARD TILT EFFECT ---
             document.querySelectorAll('.module-card').forEach(card => {
                 card.addEventListener('mousemove', (e) => {
+                    if (card.classList.contains('is-loading')) return;
                     const rect = card.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     const { width, height } = rect;
-                    const rotateX = (y / height - 0.5) * -15; // Invert for natural feel
+                    const rotateX = (y / height - 0.5) * -15;
                     const rotateY = (x / width - 0.5) * 15;
                     
                     card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
                 });
                 
                 card.addEventListener('mouseleave', () => {
+                     if (card.classList.contains('is-loading')) return;
                     card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
+            });
+
+            // --- SMART CARD PRELOADER ---
+            document.querySelectorAll('.module-card').forEach(card => {
+                card.addEventListener('click', function(event) {
+                    // Prevent navigation if already loading or if a link inside is clicked
+                    if (document.body.classList.contains('loading-active')) {
+                        event.preventDefault();
+                        return;
+                    }
+                    
+                    event.preventDefault();
+                    
+                    const destinationUrl = this.href;
+
+                    // Activate loading state
+                    document.body.classList.add('loading-active');
+                    this.classList.add('is-loading');
+                    this.style.transform = ''; // Reset tilt effect
+                    
+                    // Create a hidden iframe to preload the page
+                    const preloaderIframe = document.createElement('iframe');
+                    preloaderIframe.style.display = 'none';
+                    preloaderIframe.src = destinationUrl;
+                    
+                    preloaderIframe.onload = () => {
+                        // Once loaded, perform the navigation
+                        window.location.href = destinationUrl;
+                    };
+                    
+                    document.body.appendChild(preloaderIframe);
                 });
             });
             
@@ -748,7 +840,6 @@
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        // Use a custom property for the delay
                         const delay = Array.from(animatedElements).indexOf(entry.target) * 100;
                         entry.target.style.animationDelay = `${delay}ms`;
                         entry.target.classList.add('visible');
@@ -810,7 +901,6 @@
             
             particlesMesh.rotation.y = elapsedTime * 0.1;
             
-            // Animate camera to follow mouse
             camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.02;
             camera.position.y += (mouse.y * 0.5 - camera.position.y) * 0.02;
             camera.lookAt(scene.position);
