@@ -833,14 +833,20 @@
                     const preloaderIframe = document.createElement('iframe');
                     preloaderIframe.style.display = 'none';
                     preloaderIframe.src = destinationUrl;
+                    preloaderIframe.setAttribute('data-preloader', 'true');
+
+                    const minimumLoadTime = new Promise(resolve => setTimeout(resolve, 500));
+                    const iframeLoad = new Promise(resolve => {
+                        preloaderIframe.onload = resolve;
+                    });
                     
-                    preloaderIframe.onload = () => {
+                    Promise.all([minimumLoadTime, iframeLoad]).then(() => {
                         this.classList.add('is-ready'); 
                         
                         setTimeout(() => {
                             window.location.href = destinationUrl;
                         }, 700);
-                    };
+                    });
                     
                     document.body.appendChild(preloaderIframe);
                 });
@@ -848,13 +854,11 @@
 
             // --- RESET STATE ON PAGE BACK/FORWARD ---
             window.addEventListener('pageshow', function(event) {
-                // event.persisted is true if the page is from the bfcache
                 if (event.persisted) {
                     document.body.classList.remove('loading-active');
                     document.querySelectorAll('.module-card').forEach(card => {
                         card.classList.remove('is-loading', 'is-ready');
                     });
-                    // Clean up any stray preloader iframes
                     document.querySelectorAll('iframe[data-preloader="true"]').forEach(iframe => iframe.remove());
                 }
             });
