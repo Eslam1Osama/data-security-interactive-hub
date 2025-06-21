@@ -835,7 +835,7 @@
                     preloaderIframe.src = destinationUrl;
                     preloaderIframe.setAttribute('data-preloader', 'true');
 
-                    const minimumLoadTime = new Promise(resolve => setTimeout(resolve, 500));
+                    const minimumLoadTime = new Promise(resolve => setTimeout(resolve, 800));
                     const iframeLoad = new Promise(resolve => {
                         preloaderIframe.onload = resolve;
                     });
@@ -845,7 +845,7 @@
                         
                         setTimeout(() => {
                             window.location.href = destinationUrl;
-                        }, 700);
+                        }, 500);
                     });
                     
                     document.body.appendChild(preloaderIframe);
