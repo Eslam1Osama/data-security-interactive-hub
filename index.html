@@ -6,21 +6,18 @@
     <title>ECE4304: Data Security - Main Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- UPDATE: Immediate theme application script to prevent flash of incorrect theme (FOIT) -->
+    <!-- UPDATE: Bulletproof theme application script.
+         This is placed in the <head> and runs before any rendering to prevent a "flash of incorrect theme" (FOIT).
+         It's wrapped in a try/catch block to be robust in all browser environments. -->
     <script>
-      // This IIFE (Immediately Invoked Function Expression) runs before the page content is rendered.
-      // It checks for a saved theme in localStorage or detects the user's system preference
-      // and applies the 'data-theme' attribute to the <html> element instantly.
       (function() {
         try {
           var mode = localStorage.getItem('theme');
           if (!mode) {
-            // If no theme is saved, check the OS/browser preference
             mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           }
           document.documentElement.setAttribute('data-theme', mode);
         } catch (e) {
-          // Fails silently in case of any error (e.g., security restrictions on localStorage)
           console.error('Error applying initial theme:', e);
         }
       })();
@@ -302,6 +299,8 @@
             padding: 10px 20px;
             transform: translateY(-120%);
             transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            /* UPDATE: Hinting browser for smoother animation */
+            will-change: transform;
         }
         #sticky-header.visible {
             transform: translateY(0);
@@ -336,7 +335,8 @@
         }
         .progress-bar {
             height: 4px; background: var(--primary);
-            width: 0%; transition: width 0.1s linear;
+            width: 0%; 
+            /* UPDATE: Transition removed, width is set in JS animation loop for smoothness */
         }
         
         /* --- Hero Section --- */
@@ -375,7 +375,9 @@
             position: relative;
             overflow: hidden;
             border: 1px solid transparent;
-            will-change: transform;
+            /* UPDATE: Performance hints for the browser */
+            will-change: transform, box-shadow;
+            backface-visibility: hidden;
         }
         
         .module-card-image-wrapper {
@@ -462,7 +464,10 @@
             gap: 8px;
             transition: var(--transition);
         }
-        .launch-module .arrow-icon { transition: transform 0.3s ease; }
+        .launch-module .arrow-icon { 
+            transition: transform 0.3s ease;
+            will-change: transform;
+        }
         .module-card:hover .launch-module { color: var(--secondary); }
         .module-card:hover .arrow-icon { transform: translateX(5px); }
         
@@ -547,7 +552,8 @@
 </head>
 <body>
 
-    <div id="bg-animation"></div>
+    <!-- FIX: The background animation requires a <canvas> element, not a <div> -->
+    <canvas id="bg-animation"></canvas>
 
     <div id="preloader">
         <div class="spinner"></div>
@@ -720,20 +726,17 @@
             const stickyThemeToggleContainer = document.getElementById('stickyThemeToggleContainer');
             const stickyHeader = document.getElementById('sticky-header');
             const mainHeader = document.querySelector('.main-header');
-            const progressBar = document.getElementById('progressBar');
-
+            
             // --- THEME MANAGEMENT ---
-            // UPDATE: The initial theme is now set by a script in the <head> to prevent a "flash".
-            // This section now only handles theme *changes* initiated by the user.
             function setTheme(mode) {
                 root.setAttribute('data-theme', mode);
                 document.querySelectorAll('.toggle-switch').forEach(ts => ts.setAttribute('data-theme', mode));
-                localStorage.setItem('theme', mode);
             }
 
             const themeClickHandler = () => {
                 const currentTheme = root.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme); // Save user's explicit choice
                 setTheme(newTheme);
             };
 
@@ -743,9 +746,16 @@
             mainThemeToggle.addEventListener('click', themeClickHandler);
             stickyThemeToggle.addEventListener('click', themeClickHandler);
 
-            // Sync the toggle switch UI with the theme that was set by the <head> script.
             const currentTheme = root.getAttribute('data-theme') || 'light';
             document.querySelectorAll('.toggle-switch').forEach(ts => ts.setAttribute('data-theme', currentTheme));
+            
+            const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            colorSchemeQuery.addEventListener('change', (e) => {
+                if (!localStorage.getItem('theme')) {
+                    const newMode = e.matches ? 'dark' : 'light';
+                    setTheme(newMode);
+                }
+            });
 
 
             // --- STICKY HEADER LOGIC ---
@@ -757,16 +767,6 @@
             );
             observer.observe(mainHeader);
 
-            // --- SCROLL PROGRESS BAR ---
-            function updateProgressBar() {
-                const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-                if (scrollHeight > clientHeight) {
-                   const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
-                   progressBar.style.width = `${scrollPercent}%`;
-                }
-            }
-            window.addEventListener('scroll', updateProgressBar);
-            
             // --- COPYRIGHT NOTICE ---
             const copyrightBtn = document.getElementById('copyrightBtn');
             const copyrightNotification = document.getElementById('copyrightNotification');
@@ -794,26 +794,6 @@
 
             setTimeout(showCopyrightNotice, 2000);
             
-            // --- 3D CARD TILT EFFECT ---
-            document.querySelectorAll('.module-card').forEach(card => {
-                card.addEventListener('mousemove', (e) => {
-                    if (card.classList.contains('is-loading')) return;
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const { width, height } = rect;
-                    const rotateX = (y / height - 0.5) * -15;
-                    const rotateY = (x / width - 0.5) * 15;
-                    
-                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
-                });
-                
-                card.addEventListener('mouseleave', () => {
-                     if (card.classList.contains('is-loading')) return;
-                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-                });
-            });
-
             // --- CARD CLICK-TO-LOAD LOGIC ---
             document.querySelectorAll('.module-card').forEach(card => {
                 card.addEventListener('click', function(event) {
@@ -850,7 +830,6 @@
                     });
                 }
             });
-            
         });
 
         // --- FADE-IN ANIMATION ON SCROLL ---
@@ -873,63 +852,107 @@
             });
         }
         
-        // --- 3D BACKGROUND ANIMATION ---
+        // =====================================================================
+        // --- PERFORMANCE UPDATE: Centralized Animation & Interaction Engine ---
+        // =====================================================================
+        
+        const threeJsCanvas = document.getElementById('bg-animation');
+        const progressBar = document.getElementById('progressBar');
+        const moduleCards = document.querySelectorAll('.module-card');
+
+        const animState = {
+            mouse: { x: 0, y: 0 },
+            cameraTarget: { x: 0, y: 0 },
+            scrollY: window.scrollY,
+            hoveredCard: null,
+            cardMouse: { x: 0, y: 0 },
+        };
+
+        window.addEventListener('scroll', () => {
+            animState.scrollY = window.scrollY;
+        }, { passive: true });
+
+        window.addEventListener('mousemove', (event) => {
+            animState.mouse.x = event.clientX;
+            animState.mouse.y = event.clientY;
+            animState.cameraTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
+            animState.cameraTarget.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }, { passive: true });
+        
+        moduleCards.forEach(card => {
+            card.addEventListener('mouseenter', () => { animState.hoveredCard = card; });
+            card.addEventListener('mouseleave', () => {
+                animState.hoveredCard = null;
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+            card.addEventListener('mousemove', (e) => {
+                if (animState.hoveredCard === card) {
+                    const rect = card.getBoundingClientRect();
+                    animState.cardMouse.x = e.clientX - rect.left;
+                    animState.cardMouse.y = e.clientY - rect.top;
+                }
+            }, { passive: true });
+        });
+        
+        // --- 3D Background Setup ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        // FIX: The renderer must be initialized with the actual canvas element.
+        const renderer = new THREE.WebGLRenderer({ canvas: threeJsCanvas, alpha: true, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('bg-animation').appendChild(renderer.domElement);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        const particlesGeometry = new THREE.BufferGeometry;
+        const particlesGeometry = new THREE.BufferGeometry();
         const particlesCount = 5000;
-
         const posArray = new Float32Array(particlesCount * 3);
-
         for(let i = 0; i < particlesCount * 3; i++) {
             posArray[i] = (Math.random() - 0.5) * 5;
         }
-
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-
-        const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.005,
-            color: 0x00ACC1
-        });
-
+        const particlesMaterial = new THREE.PointsMaterial({ size: 0.005, color: 0x00ACC1 });
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
-
         camera.position.z = 2;
-        
-        const mouse = new THREE.Vector2();
-        
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        });
-        
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         });
 
+        // --- The Central Animation Loop ---
         const clock = new THREE.Clock();
-
-        const animate = () => {
+        const mainAnimationLoop = () => {
             const elapsedTime = clock.getElapsedTime();
             
+            // 1. Animate 3D Background
             particlesMesh.rotation.y = elapsedTime * 0.1;
-            
-            camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.02;
-            camera.position.y += (mouse.y * 0.5 - camera.position.y) * 0.02;
+            camera.position.x += (animState.cameraTarget.x * 0.5 - camera.position.x) * 0.02;
+            camera.position.y += (animState.cameraTarget.y * 0.5 - camera.position.y) * 0.02;
             camera.lookAt(scene.position);
-
             renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+
+            // 2. Update Scroll Progress Bar
+            const { scrollHeight, clientHeight } = document.documentElement;
+            const scrollPercent = (animState.scrollY / (scrollHeight - clientHeight)) * 100;
+            progressBar.style.width = `${scrollPercent}%`;
+
+            // 3. Update 3D Card Tilt Effect
+            if (animState.hoveredCard && !animState.hoveredCard.classList.contains('is-loading')) {
+                const card = animState.hoveredCard;
+                const rect = card.getBoundingClientRect();
+                const rotateX = (animState.cardMouse.y / rect.height - 0.5) * -15;
+                const rotateY = (animState.cardMouse.x / rect.width - 0.5) * 15;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+            }
+
+            // Continue the loop
+            requestAnimationFrame(mainAnimationLoop);
         };
 
-        animate();
+        // Start the engine!
+        mainAnimationLoop();
     </script>
 </body>
 </html>
