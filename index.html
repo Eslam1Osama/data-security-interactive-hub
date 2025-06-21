@@ -835,9 +835,8 @@
                     preloaderIframe.src = destinationUrl;
                     
                     preloaderIframe.onload = () => {
-                        this.classList.add('is-ready'); // Add ready class
+                        this.classList.add('is-ready'); 
                         
-                        // Navigate after a short delay to show the "Ready" state
                         setTimeout(() => {
                             window.location.href = destinationUrl;
                         }, 700);
@@ -845,6 +844,19 @@
                     
                     document.body.appendChild(preloaderIframe);
                 });
+            });
+
+            // --- RESET STATE ON PAGE BACK/FORWARD ---
+            window.addEventListener('pageshow', function(event) {
+                // event.persisted is true if the page is from the bfcache
+                if (event.persisted) {
+                    document.body.classList.remove('loading-active');
+                    document.querySelectorAll('.module-card').forEach(card => {
+                        card.classList.remove('is-loading', 'is-ready');
+                    });
+                    // Clean up any stray preloader iframes
+                    document.querySelectorAll('iframe[data-preloader="true"]').forEach(iframe => iframe.remove());
+                }
             });
             
         });
