@@ -4,7 +4,7 @@
 
 An interactive, animated landing page for the **ECE4304 Data Security** course at the Arab Academy of Science, Technology and Maritime Transport (AASTMT). This project serves as a central, visually engaging hub that links to all the interactive learning modules for the course.
 
-### [Live Demo Link (Placeholder)](https://your-live-url-here.com)
+### [Live Demo Link](https://data-security-interactive-hub.vercel.app/)
 
 ## ✨ Features
 
