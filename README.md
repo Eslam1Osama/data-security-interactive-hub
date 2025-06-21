@@ -1,7 +1,5 @@
 # ECE4304: Data Security Interactive Learning Hub
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 An interactive, animated landing page for the **ECE4304 Data Security** course at the Arab Academy of Science, Technology and Maritime Transport (AASTMT). This project serves as a central, visually engaging hub that links to all the interactive learning modules for the course.
 
 ### [Live Demo Link](https://data-security-interactive-hub.vercel.app/)
@@ -36,19 +34,13 @@ This hub provides access to the following learning modules:
 -   **[three.js](https://threejs.org/)**: For the 3D background animation.
 -   **[Font Awesome](https://fontawesome.com/)**: For icons.
 
-## 🚀 Getting Started
+## ⚖️ License & Copyright
 
-No complex build steps or dependencies are required.
+**© 2025 Eng. Eslam Osama. All Rights Reserved.**
 
-1.  Clone the repository:
-    ```bash
-    git clone [https://github.com/your-username/data-security-interactive-hub.git](https://github.com/your-username/data-security-interactive-hub.git)
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd data-security-interactive-hub
-    ```
-3.  Open the `index.html` file in your browser.
+This content is protected by copyright law. Unauthorized copying, distribution, or use of this material is strictly prohibited. The code, design, and content of this educational module are the exclusive property of the creator. Any reproduction or distribution without express written permission is a violation of copyright law.
+
+This module is provided for educational purposes only. The creator makes no warranties about the completeness, reliability, or accuracy of this information.
 
 ## Acknowledgments
 
