@@ -138,6 +138,11 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+        
+        @keyframes pop-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
         .fade-in-up {
             opacity: 0;
@@ -409,12 +414,21 @@
             border-style: solid;
             border-width: 4px;
             border-radius: 50%;
-            display: inline-block;
+            display: block;
         }
-        @keyframes card-spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        .card-ready-indicator {
+            display: none;
+            color: #fff;
+            font-size: 3em;
+            animation: pop-in 0.3s ease-out;
         }
+        .module-card.is-ready .card-spinner {
+            display: none;
+        }
+        .module-card.is-ready .card-ready-indicator {
+            display: block;
+        }
+
 
         .module-content {
             padding: 25px;
@@ -542,13 +556,11 @@
     <div id="page-blocker"></div>
 
 
-    <!-- Sticky Header -->
     <header id="sticky-header">
         <div class="sticky-header-content">
             <div class="sticky-header-title">ECE4304: Data Security</div>
             <div class="sticky-header-toggle" id="stickyThemeToggleContainer">
-                <!-- The theme toggle will be cloned here by JS -->
-            </div>
+                </div>
         </div>
         <div class="progress-container">
             <div class="progress-bar" id="progressBar"></div>
@@ -559,7 +571,6 @@
     <div class="page-content" id="pageContent">
 
         <div class="container">
-            <!-- Header Section -->
             <header class="main-header fade-in-up">
                 <div class="header-animated-bg"></div>
                 <div class="theme-toggle" id="mainThemeToggle">
@@ -590,18 +601,18 @@
             </header>
 
             <main>
-                <!-- Hero Section -->
                 <section class="hero-section fade-in-up">
                     <h2>Course Learning Modules</h2>
                     <p>An interactive journey into the core principles of data security. Select a module below to begin your exploration of key concepts, from foundational theory to practical defense mechanisms.</p>
                 </section>
 
-                <!-- Modules Section -->
                 <section class="modules-grid">
                     
-                    <!-- Module 1: Basic Concepts -->
                     <a href="https://basic-concepts-in-data-security.vercel.app/" target="_blank" class="module-card fade-in-up">
-                        <div class="card-preloader"><div class="card-spinner"></div></div>
+                        <div class="card-preloader">
+                            <div class="card-spinner"></div>
+                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
+                        </div>
                         <div class="module-card-iframe-wrapper">
                              <iframe src="https://basic-concepts-in-data-security.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Basic Concepts module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -613,9 +624,11 @@
                         </div>
                     </a>
 
-                    <!-- Module 2: Block Cipher Operation Modes -->
                     <a href="https://block-cipher-learning-module.vercel.app/" target="_blank" class="module-card fade-in-up">
-                        <div class="card-preloader"><div class="card-spinner"></div></div>
+                        <div class="card-preloader">
+                            <div class="card-spinner"></div>
+                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
+                        </div>
                         <div class="module-card-iframe-wrapper">
                              <iframe src="https://block-cipher-learning-module.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Block Cipher Modes module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -627,9 +640,11 @@
                         </div>
                     </a>
 
-                    <!-- Module 3: Digital Signatures -->
                     <a href="https://data-security-digital-signatures.vercel.app/" target="_blank" class="module-card fade-in-up">
-                        <div class="card-preloader"><div class="card-spinner"></div></div>
+                        <div class="card-preloader">
+                            <div class="card-spinner"></div>
+                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
+                        </div>
                         <div class="module-card-iframe-wrapper">
                              <iframe src="https://data-security-digital-signatures.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Digital Signatures module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -641,9 +656,11 @@
                         </div>
                     </a>
 
-                    <!-- Module 4: Firewalls & IDS -->
                     <a href="https://firewalls-ids-web.vercel.app/" target="_blank" class="module-card fade-in-up">
-                         <div class="card-preloader"><div class="card-spinner"></div></div>
+                         <div class="card-preloader">
+                            <div class="card-spinner"></div>
+                            <div class="card-ready-indicator"><i class="fas fa-check"></i></div>
+                        </div>
                          <div class="module-card-iframe-wrapper">
                              <iframe src="https://firewalls-ids-web.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Firewalls & IDS module"></iframe>
                              <div class="iframe-overlay"></div>
@@ -659,7 +676,6 @@
             </main>
         </div>
 
-        <!-- Footer -->
         <footer>
             <div class="footer-content">
                 <p>&copy; 2025 ECE4304 Data Security | AASTMT Computer Engineering | By Eng. Eslam Osama</p>
@@ -669,8 +685,7 @@
             </div>
         </footer>
 
-         <!-- Copyright Notification Panel -->
-        <div class="notification" id="copyrightNotification">
+         <div class="notification" id="copyrightNotification">
             <div class="notification-header">
                 <div class="notification-title"><i class="fas fa-shield-alt"></i> Copyright Notice</div>
                 <button class="notification-close" id="copyrightCloseBtn"><i class="fas fa-times"></i></button>
@@ -802,7 +817,6 @@
             // --- SMART CARD PRELOADER ---
             document.querySelectorAll('.module-card').forEach(card => {
                 card.addEventListener('click', function(event) {
-                    // Prevent navigation if already loading or if a link inside is clicked
                     if (document.body.classList.contains('loading-active')) {
                         event.preventDefault();
                         return;
@@ -812,19 +826,21 @@
                     
                     const destinationUrl = this.href;
 
-                    // Activate loading state
                     document.body.classList.add('loading-active');
                     this.classList.add('is-loading');
-                    this.style.transform = ''; // Reset tilt effect
+                    this.style.transform = '';
                     
-                    // Create a hidden iframe to preload the page
                     const preloaderIframe = document.createElement('iframe');
                     preloaderIframe.style.display = 'none';
                     preloaderIframe.src = destinationUrl;
                     
                     preloaderIframe.onload = () => {
-                        // Once loaded, perform the navigation
-                        window.location.href = destinationUrl;
+                        this.classList.add('is-ready'); // Add ready class
+                        
+                        // Navigate after a short delay to show the "Ready" state
+                        setTimeout(() => {
+                            window.location.href = destinationUrl;
+                        }, 700);
                     };
                     
                     document.body.appendChild(preloaderIframe);
