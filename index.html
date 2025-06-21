@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE4304: Data Security - Main Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* Themed Color Palette & Core Styles */
+        :root {
+            --primary: #00ACC1;
+            --secondary: #4DD0E1;
+            --accent: #80DEEA;
+            --blue1: #B2EBF2;
+            --blue2: #E0F7FA;
+            --text-main: #00323d;
+            --text-secondary: #006978;
+            --bg-main: var(--blue2);
+            --bg-glass: rgba(255, 255, 255, 0.7);
+            --bg-solid: #fff;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(.4,2,.6,1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #00ACC1;
+            --secondary: #4DD0E1;
+            --accent: #80DEEA;
+            --blue1: #00323d;
+            --blue2: #006978;
+            --text-main: #E0F7FA;
+            --text-secondary: #B2EBF2;
+            --bg-main: #002329;
+            --bg-glass: rgba(0, 50, 61, 0.6);
+            --bg-solid: #00323d;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Base Setup */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background: var(--bg-main);
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        
+        #bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-main);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.5s ease-out;
+        }
+        #preloader.loaded {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--blue1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .page-content {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in, visibility 0.5s;
+            position: relative;
+            z-index: 1;
+        }
+        .page-content.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes subtle-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .fade-in-up {
+            opacity: 0;
+        }
+
+        .fade-in-up.visible {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        /* --- Header & Course Info --- */
+        .main-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 25px 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-animated-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(-45deg, var(--blue2), var(--bg-solid), var(--blue1), var(--secondary));
+            background-size: 400% 400%;
+            animation: subtle-gradient 15s ease infinite;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        [data-theme="dark"] .header-animated-bg {
+             background: linear-gradient(-45deg, #002329, #00323d, #006978, #00ACC1);
+             background-size: 400% 400%;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .header-title-wrapper {
+             display: flex;
+            align-items: center;
+        }
+
+        .course-title-icon {
+            font-size: 3em;
+            color: var(--primary);
+            margin-right: 20px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.4s ease;
+        }
+
+        .main-header:hover .course-title-icon {
+            transform: rotateY(180deg);
+        }
+
+        .course-main-title {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+        
+        .course-code {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+        }
+
+        .course-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px 25px;
+            border-top: 1px solid var(--accent);
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        
+        .detail-item strong {
+            display: block;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        
+        /* --- Theme Toggle --- */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+        }
+        .toggle-switch {
+            width: 56px; height: 28px; background: var(--blue1);
+            border-radius: 20px; position: relative; cursor: pointer;
+            transition: background 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .toggle-slider {
+            position: absolute; top: 3px; left: 3px; width: 22px; height: 22px;
+            background: white; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 1.1em; color: var(--primary);
+            transition: var(--transition);
+        }
+        .toggle-slider .icon-sun, .toggle-slider .icon-moon {
+            position: absolute; opacity: 0; transition: opacity 0.3s, transform 0.3s;
+        }
+        .toggle-slider .icon-sun { color: #FFD700; transform: scale(0.8); }
+        .toggle-slider .icon-moon { color: var(--primary); transform: scale(0.8); }
+        .toggle-switch:not([data-theme="dark"]) .icon-sun { opacity: 1; transform: scale(1); }
+        .toggle-switch[data-theme="dark"] .icon-moon { opacity: 1; transform: scale(1); }
+        
+        [data-theme="dark"] .toggle-switch { background: var(--primary); }
+        [data-theme="dark"] .toggle-slider { left: 31px; background: var(--blue1); }
+        
+        /* --- Sticky Header --- */
+        #sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
+            padding: 10px 20px;
+            transform: translateY(-120%);
+            transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        #sticky-header.visible {
+            transform: translateY(0);
+        }
+        .sticky-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sticky-header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .sticky-header-toggle .toggle-switch {
+             width: 48px; height: 24px;
+        }
+        .sticky-header-toggle .toggle-slider {
+             width: 18px; height: 18px; top: 3px; left: 3px;
+        }
+        [data-theme="dark"] .sticky-header-toggle .toggle-slider {
+            left: 27px;
+        }
+
+        /* --- Scroll Progress Bar --- */
+        .progress-container {
+            width: 100%; height: 4px; background: transparent;
+            position: absolute;
+            bottom: 0; left: 0;
+        }
+        .progress-bar {
+            height: 4px; background: var(--primary);
+            width: 0%; transition: width 0.1s linear;
+        }
+        
+        /* --- Hero Section --- */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .hero-section h2 {
+            font-size: clamp(2rem, 6vw, 3rem);
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+        .hero-section p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        /* --- Modules Grid --- */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .module-card {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+            will-change: transform; /* Performance hint for the browser */
+        }
+        
+        .module-card-iframe-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            position: relative;
+            background-color: var(--blue1);
+        }
+        
+        .module-card-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            transform: scale(0.8);
+            transform-origin: 0 0;
+            width: 125%;
+            height: 125%;
+            pointer-events: none;
+        }
+
+        .iframe-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .module-content {
+            padding: 25px;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .module-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        
+        .module-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            flex-grow: 1;
+            margin-bottom: 25px;
+        }
+
+        .launch-module {
+            color: var(--primary);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        .launch-module .arrow-icon { transition: transform 0.3s ease; }
+        .module-card:hover .launch-module { color: var(--secondary); }
+        .module-card:hover .arrow-icon { transform: translateX(5px); }
+        
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            margin-top: 60px;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            color: var(--text-secondary);
+        }
+        .copyright-btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white; border: none; padding: 6px 12px; border-radius: 15px;
+            font-size: 0.85em; cursor: pointer; transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 4px; margin-top: 15px;
+        }
+        .copyright-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Copyright Notification --- */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: -400px;
+            background: var(--bg-solid);
+            padding: 20px; border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            max-width: 380px; z-index: 1000;
+            transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .notification.show { left: 20px; }
+        .notification-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .notification-title { font-weight: bold; color: var(--primary); font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .notification-close { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5em; padding: 5px; transition: var(--transition); }
+        .notification-close:hover { color: var(--primary); transform: rotate(90deg); }
+        .notification-content { font-size: 0.95em; line-height: 1.7; color: var(--text-secondary);}
+        .notification-content p { margin-bottom: 10px; }
+        .notification-content .disclaimer { font-style: italic; opacity: 0.8; font-size: 0.9em; margin-top: 10px; }
+        
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 992px) {
+            .header-top { flex-direction: column; align-items: flex-start; text-align: left; }
+            .header-title-wrapper { margin-bottom: 20px; }
+            .theme-toggle { top: 15px; right: 15px; }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .main-header { padding: 20px; }
+            .course-details { grid-template-columns: 1fr; }
+            .modules-grid { gap: 20px; }
+            .notification { max-width: calc(100% - 40px); left: -100%; }
+            .notification.show { left: 20px; }
+             .sticky-header-title {
+                font-size: 0.9rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-animation"></div>
+
+    <div id="preloader">
+        <div class="spinner"></div>
+        <p class="loading-text">Preparing learning modules...</p>
+    </div>
+
+    <!-- Sticky Header -->
+    <header id="sticky-header">
+        <div class="sticky-header-content">
+            <div class="sticky-header-title">ECE4304: Data Security</div>
+            <div class="sticky-header-toggle" id="stickyThemeToggleContainer">
+                <!-- The theme toggle will be cloned here by JS -->
+            </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </header>
+
+
+    <div class="page-content" id="pageContent">
+
+        <div class="container">
+            <!-- Header Section -->
+            <header class="main-header fade-in-up">
+                <div class="header-animated-bg"></div>
+                <div class="theme-toggle" id="mainThemeToggle">
+                    <div class="toggle-switch" id="themeSwitch">
+                        <div class="toggle-slider">
+                            <span class="icon-sun"><i class="fas fa-sun"></i></span>
+                            <span class="icon-moon"><i class="fas fa-moon"></i></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-top">
+                    <div class="header-title-wrapper">
+                        <i class="fas fa-user-shield course-title-icon"></i>
+                        <div>
+                            <h1 class="course-main-title">Data Security <span class="course-code">ECE4304</span></h1>
+                            <p class="detail-item">Arab Academy of Science, Technology and Maritime Transport</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-details">
+                    <div class="detail-item"><strong>Instructor:</strong> Dr. Mahmoud Yehia</div>
+                    <div class="detail-item"><strong>Teaching Assistant:</strong> Eng. Eslam Osama</div>
+                    <div class="detail-item"><strong>Faculty:</strong> College of Engineering & Technology</div>
+                    <div class="detail-item"><strong>Department:</strong> Computer Engineering</div>
+                </div>
+            </header>
+
+            <main>
+                <!-- Hero Section -->
+                <section class="hero-section fade-in-up">
+                    <h2>Course Learning Modules</h2>
+                    <p>An interactive journey into the core principles of data security. Select a module below to begin your exploration of key concepts, from foundational theory to practical defense mechanisms.</p>
+                </section>
+
+                <!-- Modules Section -->
+                <section class="modules-grid">
+                    
+                    <!-- Module 1: Basic Concepts -->
+                    <a href="https://basic-concepts-in-data-security.vercel.app/" target="_blank" class="module-card fade-in-up">
+                        <div class="module-card-iframe-wrapper">
+                             <iframe src="https://basic-concepts-in-data-security.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Basic Concepts module"></iframe>
+                             <div class="iframe-overlay"></div>
+                        </div>
+                        <div class="module-content">
+                            <h3 class="module-title">Basic Concepts</h3>
+                            <p class="module-description">An introduction to the foundational principles of data security, including confidentiality, integrity, and availability (CIA triad).</p>
+                            <span class="launch-module">Launch Module <i class="fas fa-arrow-right arrow-icon"></i></span>
+                        </div>
+                    </a>
+
+                    <!-- Module 2: Block Cipher Operation Modes -->
+                    <a href="https://block-cipher-learning-module.vercel.app/" target="_blank" class="module-card fade-in-up">
+                        <div class="module-card-iframe-wrapper">
+                             <iframe src="https://block-cipher-learning-module.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Block Cipher Modes module"></iframe>
+                             <div class="iframe-overlay"></div>
+                        </div>
+                        <div class="module-content">
+                            <h3 class="module-title">Block Cipher Modes</h3>
+                            <p class="module-description">Explore how block ciphers encrypt large data sets through different modes of operation like ECB, CBC, and CTR.</p>
+                            <span class="launch-module">Launch Module <i class="fas fa-arrow-right arrow-icon"></i></span>
+                        </div>
+                    </a>
+
+                    <!-- Module 3: Digital Signatures -->
+                    <a href="https://data-security-digital-signatures.vercel.app/" target="_blank" class="module-card fade-in-up">
+                        <div class="module-card-iframe-wrapper">
+                             <iframe src="https://data-security-digital-signatures.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Digital Signatures module"></iframe>
+                             <div class="iframe-overlay"></div>
+                        </div>
+                        <div class="module-content">
+                            <h3 class="module-title">Digital Signatures</h3>
+                            <p class="module-description">Understand the mechanics of digital signatures for ensuring authenticity, non-repudiation, and message integrity.</p>
+                            <span class="launch-module">Launch Module <i class="fas fa-arrow-right arrow-icon"></i></span>
+                        </div>
+                    </a>
+
+                    <!-- Module 4: Firewalls & IDS -->
+                    <a href="https://firewalls-ids-web.vercel.app/" target="_blank" class="module-card fade-in-up">
+                         <div class="module-card-iframe-wrapper">
+                             <iframe src="https://firewalls-ids-web.vercel.app/" class="module-card-iframe" loading="lazy" title="Preview of Firewalls & IDS module"></iframe>
+                             <div class="iframe-overlay"></div>
+                        </div>
+                        <div class="module-content">
+                            <h3 class="module-title">Firewalls & IDS</h3>
+                            <p class="module-description">Learn about network defense mechanisms, the role of firewalls, and how Intrusion Detection Systems monitor for threats.</p>
+                            <span class="launch-module">Launch Module <i class="fas fa-arrow-right arrow-icon"></i></span>
+                        </div>
+                    </a>
+
+                </section>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2024 ECE4304 Data Security | AASTMT Computer Engineering | By Eng. Eslam Osama</p>
+                 <button class="copyright-btn" id="copyrightBtn">
+                    <i class="fas fa-copyright"></i> All Rights Reserved
+                </button>
+            </div>
+        </footer>
+
+         <!-- Copyright Notification Panel -->
+        <div class="notification" id="copyrightNotification">
+            <div class="notification-header">
+                <div class="notification-title"><i class="fas fa-shield-alt"></i> Copyright Notice</div>
+                <button class="notification-close" id="copyrightCloseBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="notification-content">
+                <p>This content is protected by copyright law. Unauthorized copying, distribution, or use of this material is strictly prohibited. The code, design, and content of this educational module are the exclusive property of the creator.</p>
+                <p class="disclaimer">This module is provided for educational purposes only. The creator makes no warranties about the completeness, reliability, or accuracy of this information.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- PRELOADER LOGIC ---
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('preloader');
+            const pageContent = document.getElementById('pageContent');
+            
+            preloader.classList.add('loaded');
+            
+            setTimeout(() => {
+                preloader.style.display = 'none';
+                pageContent.classList.add('visible');
+                initializeScrollAnimations();
+            }, 500);
+        });
+        
+        // --- MAIN APP LOGIC ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const root = document.documentElement;
+            const mainThemeToggle = document.getElementById('mainThemeToggle');
+            const stickyThemeToggleContainer = document.getElementById('stickyThemeToggleContainer');
+            const stickyHeader = document.getElementById('sticky-header');
+            const mainHeader = document.querySelector('.main-header');
+            const progressBar = document.getElementById('progressBar');
+
+            // --- THEME MANAGEMENT ---
+            function setTheme(mode) {
+                root.setAttribute('data-theme', mode);
+                document.querySelectorAll('.toggle-switch').forEach(ts => ts.setAttribute('data-theme', mode));
+                localStorage.setItem('theme', mode);
+            }
+
+            const themeClickHandler = () => {
+                const currentTheme = root.getAttribute('data-theme');
+                setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            };
+
+            const stickyThemeToggle = mainThemeToggle.cloneNode(true);
+            stickyThemeToggleContainer.appendChild(stickyThemeToggle);
+            
+            mainThemeToggle.addEventListener('click', themeClickHandler);
+            stickyThemeToggle.addEventListener('click', themeClickHandler);
+
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+            setTheme(initialTheme);
+            if (!savedTheme) {
+                setTheme(prefersDark ? 'dark' : 'light');
+            }
+
+            // --- STICKY HEADER LOGIC ---
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    stickyHeader.classList.toggle('visible', !entry.isIntersecting);
+                },
+                { threshold: 0 }
+            );
+            observer.observe(mainHeader);
+
+            // --- SCROLL PROGRESS BAR ---
+            function updateProgressBar() {
+                const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+                if (scrollHeight > clientHeight) {
+                   const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
+                   progressBar.style.width = `${scrollPercent}%`;
+                }
+            }
+            window.addEventListener('scroll', updateProgressBar);
+            
+            // --- COPYRIGHT NOTICE ---
+            const copyrightBtn = document.getElementById('copyrightBtn');
+            const copyrightNotification = document.getElementById('copyrightNotification');
+            const copyrightCloseBtn = document.getElementById('copyrightCloseBtn');
+
+            function showCopyrightNotice() {
+                copyrightNotification.classList.add('show');
+                setTimeout(() => {
+                    if (copyrightNotification.classList.contains('show')) {
+                        hideCopyrightNotice();
+                    }
+                }, 5000);
+            }
+
+            function hideCopyrightNotice() {
+                copyrightNotification.classList.remove('show');
+            }
+            
+            copyrightBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showCopyrightNotice();
+            });
+
+            copyrightCloseBtn.addEventListener('click', hideCopyrightNotice);
+
+            setTimeout(showCopyrightNotice, 2000);
+            
+            // --- 3D CARD TILT EFFECT ---
+            document.querySelectorAll('.module-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const { width, height } = rect;
+                    const rotateX = (y / height - 0.5) * -15; // Invert for natural feel
+                    const rotateY = (x / width - 0.5) * 15;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
+            });
+            
+        });
+
+        // --- FADE-IN ANIMATION ON SCROLL ---
+        function initializeScrollAnimations() {
+            const animatedElements = document.querySelectorAll('.fade-in-up');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        // Use a custom property for the delay
+                        const delay = Array.from(animatedElements).indexOf(entry.target) * 100;
+                        entry.target.style.animationDelay = `${delay}ms`;
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            animatedElements.forEach(el => {
+                observer.observe(el);
+            });
+        }
+        
+        // --- 3D BACKGROUND ANIMATION ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('bg-animation').appendChild(renderer.domElement);
+
+        const particlesGeometry = new THREE.BufferGeometry;
+        const particlesCount = 5000;
+
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 5;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.005,
+            color: 0x00ACC1
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 2;
+        
+        const mouse = new THREE.Vector2();
+        
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const clock = new THREE.Clock();
+
+        const animate = () => {
+            const elapsedTime = clock.getElapsedTime();
+            
+            particlesMesh.rotation.y = elapsedTime * 0.1;
+            
+            // Animate camera to follow mouse
+            camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.02;
+            camera.position.y += (mouse.y * 0.5 - camera.position.y) * 0.02;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        };
+
+        animate();
+    </script>
+</body>
+</html>
