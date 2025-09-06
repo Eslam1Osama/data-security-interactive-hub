@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Sitemap: https://data-security-interactive-hub.vercel.app/sitemap.xml
+
+# Block access to sensitive directories if any
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+
+# Allow all major search engine bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1

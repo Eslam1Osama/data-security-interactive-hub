@@ -1,0 +1,72 @@
+{
+  "name": "ECE4304 Data Security Interactive Hub",
+  "short_name": "Data Security Hub",
+  "description": "An interactive learning platform for ECE4304 Data Security course featuring modules on cryptography, network security, digital signatures, and cybersecurity fundamentals.",
+  "version": "1.0.0",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#E0F7FA",
+  "theme_color": "#00ACC1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "productivity", "utilities", "books"],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "16x16 32x32 48x48 64x64 128x128 256x256",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "media/Basic_Concepts.png",
+      "sizes": "1200x800",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Basic Concepts",
+      "short_name": "Basics",
+      "description": "Learn fundamental data security concepts",
+      "url": "/#basic-concepts",
+      "icons": [{ "src": "media/Basic_Concepts.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Block Cipher Modes",
+      "short_name": "Ciphers",
+      "description": "Explore encryption algorithms",
+      "url": "/#block-cipher-modes",
+      "icons": [{ "src": "media/Block_Cipher_Modes.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Digital Signatures",
+      "short_name": "Signatures",
+      "description": "Understanding digital authentication",
+      "url": "/#digital-signatures",
+      "icons": [{ "src": "media/Digital_Signatures.png", "sizes": "96x96" }]
+    }
+  ]
+}
