@@ -402,13 +402,12 @@ Website: https://eslam-portfolio-phi.vercel.app/
 
 **Developed with ❤️ by [EOPeak](https://eslam-portfolio-phi.vercel.app/)**
 
-*Empowering businesses with cutting-edge web solutions since 2020*
+*Empowering businesses with cutting-edge web solutions since 2025*
 
 ---
 
-[![EOPeak](https://img.shields.io/badge/EOPeak-Professional%20Development-blue?style=flat-square&logo=web&logoColor=white)](https://eopeak.com)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Eslam%20Osama-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/eslam-osama)
-[![GitHub](https://img.shields.io/badge/GitHub-eslam--osama-black?style=flat-square&logo=github)](https://github.com/eslam-osama)
+[![EOPeak](https://img.shields.io/badge/EOPeak-Professional%20Development-blue?style=flat-square&logo=web&logoColor=white)](https://eslam-portfolio-phi.vercel.app/)
+
 
 </div>
 
