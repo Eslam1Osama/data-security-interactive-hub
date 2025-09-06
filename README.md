@@ -2,12 +2,31 @@
 
 <div align="center">
 
+![Digital Signatures Logo](assets/logo.svg)
+
+**Enterprise-Grade Educational Technology Solution**
+
+*A comprehensive, interactive web application for mastering Digital Signatures and Cryptography concepts*
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-00ACC1?style=for-the-badge&logo=vercel)](https://data-security-digital-signatures.vercel.app/)
+[![License](https://img.shields.io/badge/License-Commercial-FF6F00?style=for-the-badge&logo=license)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0-4DD0E1?style=for-the-badge&logo=semver)](package.json)
+
+**Developed by [EOPeak](https://eslam-portfolio-phi.vercel.app/) | Eng. Eslam Osama Saad**
+
+</div>
+
+
+<div align="center">
+  
+![ECE4304 Data Security Logo](logo.svg)
+
+**Enterprise-Grade Interactive Learning Platform**
+
 ![EOPeak Logo](https://img.shields.io/badge/EOPeak-Professional%20Web%20Development-blue?style=for-the-badge&logo=web&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-Commercial-red?style=for-the-badge)
-
-**Enterprise-Grade Interactive Learning Platform**
 
 *Developed by [EOPeak](https://eslam-portfolio-phi.vercel.app/) | Eng. Eslam Osama Saad*
 
